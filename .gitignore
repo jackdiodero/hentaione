@@ -1,0 +1,24 @@
+# Cache and temporary files
+hts-cache/
+*.log
+*.gif
+
+# System files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-*
+
+# External CDN directories (not needed in repo)
+a.magsrv.com/
+cdn.jsdelivr.net/
+unpkg.com/
+www.google.com/
+static-assets-44d.pages.dev/
+
