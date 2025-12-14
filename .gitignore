@@ -22,3 +22,24 @@ unpkg.com/
 www.google.com/
 static-assets-44d.pages.dev/
 
+# WordPress uploads (images - too many files)
+hentai.tv/wp-content/uploads/
+
+# Individual content pages (generated, not needed in repo)
+hentai.tv/hentai/
+hentai.tv/genre/
+hentai.tv/brand/
+hentai.tv/inter/
+hentai.tv/page/
+hentai.tv/wp-json/
+hentai.tv/*.php
+hentai.tv/GET.html
+hentai.tv/index*.html
+!hentai.tv/index.html
+
+# Feed and API files
+hentai.tv/feed/
+hentai.tv/comments/
+hentai.tv/search/
+hentai.tv/cdn-cgi/
+
