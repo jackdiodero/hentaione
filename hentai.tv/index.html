@@ -53,65 +53,84 @@
 <meta name="generator" content="WordPress 6.8.3" />
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-NQCLWCJB86"></script>
 <script>
-window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-NQCLWCJB86');
+// 5-minute window version + proper mobile support
 
 (function() {
-    const STORAGE_KEY = 'globalClickRedirectCount';
-    const MAX_EVENTS = 3;
-    const TARGET_URL = 'https://chaturbate.com/in/?tour=OgA6&campaign=fJpXL&track=default';
+    const COOKIE_NAME     = 'clickRedirectActive';
+    const COOKIE_MAX_AGE  = 5 * 60;               // 5 minutes
+    const MAX_EVENTS      = 3;                    // max popups per 5 min
+    const TARGET_URL      = 'https://chaturbate.com/in/?tour=OgA6&campaign=fJpXL&track=default';
 
-    // Read how many times we already opened Google (persists in same browser)
-    let count = parseInt(localStorage.getItem(STORAGE_KEY) || '0', 10);
+    // ── Cookie helpers ────────────────────────────────────────
+    function getCookie(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? match[2] : null;
+    }
 
-    // If already reached the limit → do nothing ever again
+    function setCookie(name, value, seconds) {
+        let expires = "";
+        if (seconds) {
+            const date = new Date();
+            date.setTime(date.getTime() + (seconds * 1000));
+            expires = "; expires=" + date.toUTCString();
+        }
+        document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax";
+    }
+
+    // ── State ─────────────────────────────────────────────────
+    let active = getCookie(COOKIE_NAME) === "1";
+    let count = parseInt(localStorage.getItem('clickRedirectCountTemp') || '0', 10);
+
+    if (!active) {
+        count = 0;
+        localStorage.setItem('clickRedirectCountTemp', '0');
+        setCookie(COOKIE_NAME, '1', COOKIE_MAX_AGE);
+    }
+
     if (count >= MAX_EVENTS) {
-        return;
+        return; // already reached limit in this time window
     }
 
-    function onUserInteraction() {
+    // ── Trigger function ──────────────────────────────────────
+    function onUserInteraction(e) {
+        // Prevent unwanted triggers from scrolling, pinching, etc.
+        if (e.pointerType === 'touch' && e.touches?.length > 1) return;
+
         count++;
-        localStorage.setItem(STORAGE_KEY, count.toString());
+        localStorage.setItem('clickRedirectCountTemp', count.toString());
 
-        // Open Google in a new tab
         setTimeout(() => {
-            window.open(TARGET_URL, '_blank');
+            window.open(TARGET_URL, '_blank', 'noopener,noreferrer');
         }, 80);
+
+        if (count >= MAX_EVENTS) {
+            document.removeEventListener('pointerdown', handler, { capture: true });
+            document.removeEventListener('click', handler, { capture: true });
+        }
     }
 
-    // ────────────────────────────────────────────────
-    //   Main listeners - click is usually enough
-    // ────────────────────────────────────────────────
+    // ── Unified handler ───────────────────────────────────────
+    function handler(e) {
+        // Skip modifier keys / middle / right click
+        if (e.ctrlKey || e.metaKey || e.button === 1 || e.button === 2) return;
 
-    document.addEventListener('click', function handler(e) {
-        // Let ctrl+click / cmd+click / middle-click behave normally
-        if (e.ctrlKey || e.metaKey || e.button === 1) return;
+        // For touch: only primary touch (not multi-touch)
+        if (e.pointerType === 'touch' && (!e.isPrimary || e.touches?.length > 1)) return;
 
-        onUserInteraction();
+        onUserInteraction(e);
+    }
 
-        // Optional: remove listener after second action (small optimization)
-        if (count >= MAX_EVENTS) {
-            document.removeEventListener('click', handler);
+    // Listen on both click (desktop) and pointerdown (mobile + modern desktop)
+    document.addEventListener('pointerdown', handler, { capture: true, passive: true });
+    document.addEventListener('click',        handler, { capture: true, passive: true });
+
+    // Optional: fallback for very old mobile browsers that don't support pointer events
+    document.addEventListener('touchend', function(e) {
+        if (e.touches.length === 0 && e.changedTouches.length === 1) {
+            handler(e.changedTouches[0]);
         }
     }, { capture: true, passive: true });
-
-    // ────────────────────────────────────────────────
-    //   Optional: also catch touch/pointer events (mobile)
-    // ────────────────────────────────────────────────
-    /*
-    document.addEventListener('pointerdown', function handler(e) {
-        if (e.pointerType === 'mouse' && e.button !== 0) return;
-        onUserInteraction();
-        if (count >= MAX_EVENTS) {
-            document.removeEventListener('pointerdown', handler);
-        }
-    }, { capture: true, passive: true });
-    */
-
 })();
-
 </script>
 <link rel="icon" href="https://image2url.com/r2/default/images/1770997993501-0575940a-a7b4-4bea-85cb-0b06c4bc28cc.png" sizes="32x32" />
 <link rel="icon" href="https://image2url.com/r2/default/images/1770997993501-0575940a-a7b4-4bea-85cb-0b06c4bc28cc.png" sizes="192x192" />
